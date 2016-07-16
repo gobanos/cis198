@@ -1,4 +1,3 @@
 target
-Cargo.lock
-hw00.iml
+*.iml
 .idea
