@@ -36,3 +36,15 @@ fn test_filter_small() {
     let vs = vec![-2, -1, 0, 1, 2];
     assert_eq!(filter(&vs, &positive), vec![1, 2]);
 }
+
+//
+// Problem 2
+//
+
+#[test]
+#[should_panic]
+fn test_mat_mult_panic() {
+    let mat1 = vec![vec![0.;3]; 3];
+    let mat2 = vec![vec![5.;3]; 2];
+    mat_mult(&mat1, &mat2);
+}
