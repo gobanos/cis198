@@ -2,7 +2,7 @@
 
 use problem1::{sum, dedup, filter};
 use problem2::mat_mult;
-//use problem3::sieve;
+use problem3::sieve;
 //use problem4::{hanoi, Peg};
 
 //
@@ -47,4 +47,13 @@ fn test_mat_mult_panic() {
     let mat1 = vec![vec![0.;3]; 3];
     let mat2 = vec![vec![5.;3]; 2];
     mat_mult(&mat1, &mat2);
+}
+
+//
+// Problem 3
+//
+
+#[test]
+fn test_sieve_empty() {
+    assert_eq!(Vec::<u32>::new(), sieve(2));
 }
