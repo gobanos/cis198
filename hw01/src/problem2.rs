@@ -6,7 +6,7 @@ pub fn mat_mult(mat1: &Matrix, mat2: &Matrix) -> Matrix {
     let mut product = Vec::with_capacity(mat1.len());
 
     for row1 in mat1.iter() {
-        assert!(row1.len() == mat2.len());
+        assert_eq!(row1.len(), mat2.len());
         let length = mat2[0].len();
         let mut row = Vec::with_capacity(length);
 
