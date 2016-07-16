@@ -3,7 +3,7 @@
 use problem1::{sum, dedup, filter};
 use problem2::mat_mult;
 use problem3::sieve;
-//use problem4::{hanoi, Peg};
+use problem4::{hanoi, Peg};
 
 //
 // Problem 1
@@ -65,13 +65,13 @@ fn test_sieve_basic() {
     assert_eq!(vec![2,3,5,7,11], sieve(12));
 }
 
-////
-//// Problem 4
-////
 //
-//#[test]
-//fn test_hanoi_1_disks() {
-//    let result = hanoi(1, Peg::A, Peg::B, Peg::C);
-//    assert_eq!(vec![(Peg::A, Peg::C)], result);
-//    assert_eq!(1, result.len());
-//}
+// Problem 4
+//
+
+#[test]
+fn test_hanoi_1_disks() {
+    let result = hanoi(1, Peg::A, Peg::B, Peg::C);
+    assert_eq!(vec![(Peg::A, Peg::C)], result);
+    assert_eq!(1, result.len());
+}

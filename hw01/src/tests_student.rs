@@ -3,7 +3,7 @@
 use problem1::{sum, dedup, filter};
 use problem2::mat_mult;
 use problem3::sieve;
-//use problem4::{hanoi, Peg};
+use problem4::{hanoi, Peg};
 
 //
 // Problem 1
@@ -56,4 +56,15 @@ fn test_mat_mult_panic() {
 #[test]
 fn test_sieve_empty() {
     assert_eq!(Vec::<u32>::new(), sieve(2));
+}
+
+//
+// Problem 4
+//
+
+#[test]
+fn test_hanoi_2_disks() {
+    let result = hanoi(2, Peg::A, Peg::B, Peg::C);
+    assert_eq!(vec![(Peg::A, Peg::B), (Peg::A, Peg::C), (Peg::B, Peg::C)], result);
+    assert_eq!(3, result.len());
 }
