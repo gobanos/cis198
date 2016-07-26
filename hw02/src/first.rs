@@ -98,4 +98,11 @@ mod test {
         assert!(bst.search(4));
         assert!(bst.search(5));
     }
+
+    #[test]
+    fn test_multiple_inserts() {
+        let mut bst = BST::new();
+        assert!(bst.insert(1));
+        assert!(!bst.insert(1));
+    }
 }
