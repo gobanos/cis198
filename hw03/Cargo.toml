@@ -1,0 +1,10 @@
+[package]
+name = "hw03"
+version = "0.1.0"
+authors = ["Grégory OBANOS <gregory.obanos@gmail.com>"]
+
+[dependencies]
+clippy = { version = "*", optional = true }
+
+[features]
+default = []
