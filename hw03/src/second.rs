@@ -1,5 +1,7 @@
 use std::cmp;
 
+pub struct IntoIter<T>(BST<T>);
+
 #[derive(Debug)]
 pub struct BST<T> {
     root: Link<T>,
@@ -18,6 +20,10 @@ impl<T: cmp::PartialOrd> BST<T> {
 
     pub fn search(&self, val: T) -> bool {
         self.root.search(val)
+    }
+
+    pub fn into_iter(self) -> IntoIter<T> {
+        IntoIter(self)
     }
 }
 
@@ -72,6 +78,16 @@ struct Node<T> {
     right: Link<T>,
 }
 
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.root.take().map(|box Node {elem, right, ..}| {
+            self.0.root = right.map(|node| node);
+            elem
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::BST;
@@ -107,5 +123,19 @@ mod test {
         let mut bst = BST::new();
         assert!(bst.insert(1));
         assert!(!bst.insert(1));
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut bst = BST::new();
+        assert!(bst.insert(1));
+        assert!(bst.insert(2));
+        assert!(bst.insert(3));
+
+        let mut iter = bst.into_iter();
+        assert_eq!(iter.next(), Some(1));
+        assert_eq!(iter.next(), Some(2));
+        assert_eq!(iter.next(), Some(3));
+        assert_eq!(iter.next(), None);
     }
 }
