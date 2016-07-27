@@ -1,38 +1,41 @@
+use std::cmp;
+
 #[derive(Debug)]
-pub struct BST {
-    root: Link,
+pub struct BST<T> {
+    root: Link<T>,
 }
 
-impl BST {
-    pub fn new() -> BST {
+impl<T: cmp::PartialOrd> BST<T> {
+    pub fn new() -> Self {
         BST {
-            root: Link::Empty,
+            root: None,
         }
     }
 
-    pub fn insert(&mut self, val: i32) -> bool {
+    pub fn insert(&mut self, val: T) -> bool {
         self.root.insert(val)
     }
 
-    pub fn search(&self, val: i32) -> bool {
+    pub fn search(&self, val: T) -> bool {
         self.root.search(val)
     }
 }
 
-#[derive(Debug)]
-enum Link {
-    Empty,
-    More(Box<Node>),
+trait InsertSearch<T: cmp::PartialOrd> {
+    fn insert(&mut self, val: T) -> bool;
+    fn search(&self, val: T) -> bool;
 }
 
-impl Link {
-    fn insert(&mut self, val: i32) -> bool {
+type Link<T> = Option<Box<Node<T>>>;
+
+impl<T: cmp::PartialOrd> InsertSearch<T> for Link<T> {
+    fn insert(&mut self, val: T) -> bool {
         match self {
-            &mut Link::Empty => {
-                *self = Link::More(Box::new(Node { elem: val, left: Link::Empty, right: Link::Empty }));
+            &mut None => {
+                *self = Some(Box::new(Node { elem: val, left: None, right: None }));
                 true
             },
-            &mut Link::More(ref mut n) => {
+            &mut Some(ref mut n) => {
                 if n.elem > val {
                     n.left.insert(val)
                 } else if n.elem < val {
@@ -44,12 +47,12 @@ impl Link {
         }
     }
 
-    fn search(&self, val: i32) -> bool {
+    fn search(&self, val: T) -> bool {
         match self {
-            &Link::Empty => {
+            &None => {
                 false
             },
-            &Link::More(ref n) => {
+            &Some(ref n) => {
                 if n.elem > val {
                     n.left.search(val)
                 } else if n.elem < val {
@@ -63,10 +66,10 @@ impl Link {
 }
 
 #[derive(Debug)]
-struct Node {
-    elem: i32,
-    left: Link,
-    right: Link,
+struct Node<T> {
+    elem: T,
+    left: Link<T>,
+    right: Link<T>,
 }
 
 #[cfg(test)]
