@@ -1,6 +1,12 @@
 use std::cmp;
 
 pub struct IntoIter<T>(BST<T>);
+pub struct Iter<'a, T: 'a> {
+    next: Option<&'a Node<T>>,
+}
+pub struct IterMut<'a, T: 'a> {
+    next: Option<&'a mut Node<T>>,
+}
 
 #[derive(Debug)]
 pub struct BST<T> {
@@ -21,9 +27,29 @@ impl<T: cmp::PartialOrd> BST<T> {
     pub fn search(&self, val: T) -> bool {
         self.root.search(val)
     }
+}
 
-    pub fn into_iter(self) -> IntoIter<T> {
+impl<T> IntoIterator for BST<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
         IntoIter(self)
+    }
+}
+
+impl<'a, T> IntoIterator for &'a BST<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+    fn into_iter(self) -> Self::IntoIter {
+        Iter { next: self.root.as_ref().map(|node| &**node) }
+    }
+}
+
+impl<'a, T> IntoIterator for &'a mut BST<T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
+    fn into_iter(self) -> Self::IntoIter {
+        IterMut { next: self.root.as_mut().map(|node| &mut **node) }
     }
 }
 
@@ -88,6 +114,26 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.right.as_ref().map(|node| &**node);
+            &node.elem
+        })
+    }
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.right.as_mut().map(|node| &mut **node);
+            &mut node.elem
+        })
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::BST;
@@ -136,6 +182,34 @@ mod test {
         assert_eq!(iter.next(), Some(1));
         assert_eq!(iter.next(), Some(2));
         assert_eq!(iter.next(), Some(3));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iter() {
+        let mut bst = BST::new();
+        assert!(bst.insert(1));
+        assert!(bst.insert(2));
+        assert!(bst.insert(3));
+
+        let mut iter = (&bst).into_iter();
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut bst = BST::new();
+        assert!(bst.insert(1));
+        assert!(bst.insert(2));
+        assert!(bst.insert(3));
+
+        let mut iter = (&mut bst).into_iter();
+        assert_eq!(iter.next(), Some(&mut 1));
+        assert_eq!(iter.next(), Some(&mut 2));
+        assert_eq!(iter.next(), Some(&mut 3));
         assert_eq!(iter.next(), None);
     }
 }
