@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-
+use std::str::FromStr;
 use rpn::{self, Stack};
 
 /// Start a read-eval-print loop, which runs until an error or `quit`.
@@ -12,9 +12,10 @@ pub fn read_eval_print_loop() -> rpn::Result<()> {
         print!("> ");
         try!(io::stdout().flush().map_err(rpn::Error::IO));
 
-        // TODO: Read from stdin into a String, and evaluate_line the result.
-        // * An io::Error should be converted into a rpn::Error::IO
-        unimplemented!();
+        let mut buffer = String::new();
+        try!(io::stdin().read_line(&mut buffer).map_err(rpn::Error::IO));
+
+        try!(evaluate_line(&mut stack, &buffer));
     }
 }
 
@@ -22,8 +23,40 @@ fn evaluate_line(stack: &mut Stack, buf: &String) -> rpn::Result<()> {
     // Create an iterator over the tokens.
     let tokens = buf.trim().split_whitespace();
 
-    // TODO: Evaluate all of the tokens on the line.
-    unimplemented!()
+    for token in tokens {
+        match token {
+            "true" => {
+                try!(stack.push(rpn::Elt::Bool(true)));
+            },
+            "false" => {
+                try!(stack.push(rpn::Elt::Bool(false)));
+            },
+            "+" => {
+                try!(stack.eval(rpn::Op::Add));
+            },
+            "~" => {
+                try!(stack.eval(rpn::Op::Neg));
+            },
+            "<->" => {
+                try!(stack.eval(rpn::Op::Swap));
+            },
+            "=" => {
+                try!(stack.eval(rpn::Op::Eq));
+            },
+            "#" => {
+                try!(stack.eval(rpn::Op::Rand));
+            },
+            "quit" => {
+                try!(stack.eval(rpn::Op::Quit));
+            },
+            _ => {
+                let value = try!(i32::from_str(token).map_err(|_| rpn::Error::Syntax));
+                try!(stack.push(rpn::Elt::Int(value)));
+            }
+        };
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]

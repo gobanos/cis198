@@ -1,5 +1,6 @@
 use std::result;
 use std::io;
+use rand::{thread_rng, Rng};
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 /// An element of the stack. May be either integer or boolean.
@@ -40,29 +41,92 @@ pub enum Op {
     Quit,
 }
 
-// TODO: Stack.
+#[derive(Debug)]
+pub struct Stack {
+    elts: Vec<Elt>,
+}
 
-// TODO: Result.
+pub type Result<T> = result::Result<T, Error>;
 
 impl Stack {
     /// Creates a new Stack
     pub fn new() -> Stack {
-        unimplemented!()
+        Stack { elts: Vec::new() }
     }
 
     /// Pushes a value onto the stack.
     pub fn push(&mut self, val: Elt) -> Result<()> {
-        unimplemented!()
+        self.elts.push(val);
+        Ok(())
     }
 
     /// Tries to pop a value off of the stack.
     pub fn pop(&mut self) -> Result<Elt> {
-        unimplemented!()
+        self.elts.pop().ok_or(Error::Underflow)
     }
 
     /// Tries to evaluate an operator using values on the stack.
     pub fn eval(&mut self, op: Op) -> Result<()> {
-        unimplemented!()
+        match op {
+            Op::Add => {
+                // Adds two numbers: pop x, pop y, push x + y.
+                if let (Elt::Int(x), Elt::Int(y)) = (try!(self.pop()), try!(self.pop())) {
+                    self.push(Elt::Int(x + y))
+                } else {
+                    Err(Error::Type)
+                }
+            },
+            Op::Eq => {
+                // Checks equality of two values: pop x, pop y, push x == y.
+                match (try!(self.pop()), try!(self.pop())) {
+                    (Elt::Int(x), Elt::Int(y)) => {
+                        self.push(Elt::Bool(x == y))
+                    },
+                    (Elt::Bool(x), Elt::Bool(y)) => {
+                        self.push(Elt::Bool(x == y))
+                    },
+                    _ => {
+                        Err(Error::Type)
+                    }
+                }
+            },
+            Op::Neg => {
+                // Negates a value: pop x, push ~x.
+                match try!(self.pop()) {
+                    Elt::Bool(x) => {
+                        self.push(Elt::Bool(!x))
+                    },
+                    Elt::Int(x) => {
+                        self.push(Elt::Int(-x))
+                    }
+                }
+            },
+            Op::Swap => {
+                // Swaps two values: pop x, pop y, push x, push y.
+                let x = try!(self.pop());
+                let y = try!(self.pop());
+
+                try!(self.push(x));
+                try!(self.push(y));
+                Ok(())
+            },
+            Op::Rand => {
+                // Computes a random number: pop x, push random number in [0, x).
+                if let Elt::Int(x) = try!(self.pop()) {
+                    if x <= 0 {
+                        Err(Error::Type)
+                    } else {
+                        self.push(Elt::Int(thread_rng().gen_range(0, x)))
+                    }
+                } else {
+                    Err(Error::Type)
+                }
+            },
+            Op::Quit => {
+                // Quit the calculator.
+                Err(Error::Quit)
+            }
+        }
     }
 }
 
